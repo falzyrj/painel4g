@@ -1,0 +1,73 @@
+<?php
+// Verifica se o formulário foi enviado
+if(isset($_POST['submit'])) {
+// Obtém os dados do formulário
+$servidor = $_POST['servidor'];
+$usuario = $_POST['usuario'];
+$senha = $_POST['senha'];
+$banco = $_POST['banco'];
+// Cria o arquivo connection.php
+$content = '<?php
+abstract class Connection
+{
+private static $conn;
+public static function getConn()
+{
+if (self::$conn == null) {
+try {
+$dbname = "' . $banco . '";
+$dbhost = "' . $servidor . '";
+$dbuser = "' . $usuario . '";
+$dbpass = "' . $senha . '";
+self::$conn = new PDO(
+"mysql:host=$dbhost;dbname=$dbname",
+$dbuser,
+$dbpass,
+array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8")
+);
+} catch (PDOException $e) {
+echo "<br><br><center>Acesse o menu <strong>Painel Connecta4G</strong> depois <strong>Config4G</strong> para instalar o banco de dados.</strong><br><br>" . $e->getMessage();
+exit;
+}
+}
+return self::$conn;
+}
+}
+?>';
+// Cria o arquivo config.php
+$file = fopen('lib/database/Connection.php', 'w');
+fwrite($file, $content);
+fclose($file);
+// Define as permissões do arquivo config.php
+chmod('/lib/database/Connection.php', 0644);
+// Redireciona para a página de sucesso
+header('Location: sucesso.php');
+exit;
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<form method="POST" action="">
+<label for="servidor">Servidor localhost:</label>
+<input type="text" name="servidor" id="servidor" placeholder="localhost" required>
+<label for="usuario">Login phpmyadmin:</label>
+<input type="text" name="usuario" id="usuario" placeholder="root" required>
+<label for="senha">Senha do phpmyadmin:</label>
+<input type="password" name="senha" id="senha" placeholder="senha root" required>
+<label for="banco">Banco de dados:</label>
+<input type="text" name="banco" id="banco" placeholder="net" required>
+<input type="submit" name="submit" value="Criar banco de dados">
+</form>
+<script>
+// Centraliza o formulário na tela
+const form = document.querySelector('form');
+const bodyHeight = document.body.offsetHeight;
+const formHeight = form.offsetHeight;
+const marginTop = (bodyHeight - formHeight) / 2;
+form.style.marginTop = `${marginTop}px`;
+</script>
+</body>
+</html>
